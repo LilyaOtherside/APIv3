@@ -91,12 +91,10 @@ app.delete('/api/v1/consent/:id', checkJWT, async (req, res) => {
   const { id } = req.params;
 
   try {
-    const consent = await Consent.findById(id);
-    if (!consent) {
+    const result = await Consent.deleteOne({ _id: id });
+    if (result.deletedCount === 0) {
       return res.status(404).send({ message: 'Consent not found' });
     }
-
-    await consent.remove();
 
     res.send({ message: 'Consent deleted' });
   } catch (err) {
