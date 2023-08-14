@@ -53,19 +53,16 @@ app.use(bodyParser.json());
 app.get('/api/v1/consent', checkJWT, async (req, res) => {
   try {
     const consents = await Consent.find();
-    res.send({ consents });
+    res.send(consents);
   } catch (err) {
-    res.status(500).send({ message: 'Error retrieving consents' });
+    res.status(500).send({ message: 'Error fetching consents' });
   }
 });
 
 app.post('/api/v1/consent', checkJWT, async (req, res) => {
   const { text } = req.body;
-  if (!text) {
-    return res.status(400).send({ message: 'Text is required' });
-  }
-
   const consent = new Consent({ text });
+
   try {
     await consent.save();
     res.send({ message: 'Consent created', consent });
@@ -83,13 +80,10 @@ app.put('/api/v1/consent/:id', checkJWT, async (req, res) => {
   }
 
   try {
-    const consent = await Consent.findById(id);
+    const consent = await Consent.findByIdAndUpdate(id, { text }, { new: true });
     if (!consent) {
       return res.status(404).send({ message: 'Consent not found' });
     }
-
-    consent.text = text;
-    await consent.save();
 
     res.send({ message: 'Consent updated', consent });
   } catch (err) {
