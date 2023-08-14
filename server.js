@@ -77,14 +77,11 @@ app.post('/register', async (req, res) => {
   }
 });
 
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
-  User.findOne({ username }, (err, user) => {
-    if (err) {
-      return res.status(500).send({ message: 'Error logging in' });
-    }
-
+  try {
+    const user = await User.findOne({ username });
     if (!user || !bcrypt.compareSync(password, user.password)) {
       return res.status(401).send({ message: 'Invalid username or password' });
     }
@@ -92,7 +89,9 @@ app.post('/login', (req, res) => {
     const token = jwt.sign({ username: user.username }, process.env.JWT_SECRET);
 
     res.send({ token });
-  });
+  } catch (err) {
+    return res.status(500).send({ message: 'Error logging in' });
+  }
 });
 
 app.listen(3000, () => console.log('Server running on port 3000'));
