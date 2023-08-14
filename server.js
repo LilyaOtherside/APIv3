@@ -50,16 +50,51 @@ const checkJWT = (req, res, next) => {
 app.use(bodyParser.json());
 
 // Define your endpoints
-app.get('/api/v1/consent', checkJWT, (req, res) => {
-  // ...
+app.get('/api/v1/consent', checkJWT, async (req, res) => {
+  try {
+    const consents = await Consent.find();
+    res.send({ consents });
+  } catch (err) {
+    res.status(500).send({ message: 'Error retrieving consents' });
+  }
 });
 
-app.post('/api/v1/consent', checkJWT, (req, res) => {
-  // ...
+app.post('/api/v1/consent', checkJWT, async (req, res) => {
+  const { text } = req.body;
+  if (!text) {
+    return res.status(400).send({ message: 'Text is required' });
+  }
+
+  const consent = new Consent({ text });
+  try {
+    await consent.save();
+    res.send({ message: 'Consent created', consent });
+  } catch (err) {
+    res.status(500).send({ message: 'Error creating consent' });
+  }
 });
 
-app.put('/api/v1/consent/:id', checkJWT, (req, res) => {
-  // ...
+app.put('/api/v1/consent/:id', checkJWT, async (req, res) => {
+  const { id } = req.params;
+  const { text } = req.body;
+
+  if (!text) {
+    return res.status(400).send({ message: 'Text is required' });
+  }
+
+  try {
+    const consent = await Consent.findById(id);
+    if (!consent) {
+      return res.status(404).send({ message: 'Consent not found' });
+    }
+
+    consent.text = text;
+    await consent.save();
+
+    res.send({ message: 'Consent updated', consent });
+  } catch (err) {
+    res.status(500).send({ message: 'Error updating consent' });
+  }
 });
 
 app.post('/register', async (req, res) => {
