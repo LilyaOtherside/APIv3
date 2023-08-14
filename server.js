@@ -100,7 +100,8 @@ app.delete('/api/v1/consent/:id', checkJWT, async (req, res) => {
 
     res.send({ message: 'Consent deleted' });
   } catch (err) {
-    res.status(500).send({ message: 'Error deleting consent' });
+    console.error(err);
+    res.status(500).send({ message: 'Error deleting consent', error: err.message });
   }
 });
 
