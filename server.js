@@ -50,44 +50,33 @@ const checkJWT = (req, res, next) => {
 app.use(bodyParser.json());
 
 // Define your endpoints
-app.get('/api/v1/consent', checkJWT, async (req, res) => {
-  try {
-    const consents = await Consent.find();
-    res.send(consents);
-  } catch (err) {
-    res.status(500).send({ message: 'Error fetching consents' });
-  }
+app.get('/api/v1/consent', checkJWT, (req, res) => {
+  // Implement logic to retrieve consents
 });
 
-app.post('/api/v1/consent', checkJWT, async (req, res) => {
-  const { text } = req.body;
-  const consent = new Consent({ text });
-
-  try {
-    await consent.save();
-    res.send({ message: 'Consent created', consent });
-  } catch (err) {
-    res.status(500).send({ message: 'Error creating consent' });
-  }
+app.post('/api/v1/consent', checkJWT, (req, res) => {
+  // Implement logic to create a new consent
 });
 
-app.put('/api/v1/consent/:id', checkJWT, async (req, res) => {
+app.put('/api/v1/consent/:id', checkJWT, (req, res) => {
+  // Implement logic to update a specific consent
+});
+
+app.delete('/api/v1/consent/:id', checkJWT, async (req, res) => {
   const { id } = req.params;
-  const { text } = req.body;
-
-  if (!text) {
-    return res.status(400).send({ message: 'Text is required' });
-  }
 
   try {
-    const consent = await Consent.findByIdAndUpdate(id, { text }, { new: true });
+    const consent = await Consent.findById(id);
     if (!consent) {
       return res.status(404).send({ message: 'Consent not found' });
     }
 
-    res.send({ message: 'Consent updated', consent });
+    await consent.remove();
+
+    res.send({ message: 'Consent deleted' });
   } catch (err) {
-    res.status(500).send({ message: 'Error updating consent' });
+    console.error(err);
+    res.status(500).send({ message: 'Error deleting consent', error: err.message });
   }
 });
 
