@@ -62,20 +62,19 @@ app.put('/api/v1/consent/:id', checkJWT, (req, res) => {
   // ...
 });
 
-app.post('/register', (req, res) => {
+app.post('/register', async (req, res) => {
   const { username, password } = req.body;
 
   const hashedPassword = bcrypt.hashSync(password, 8);
 
   const user = new User({ username, password: hashedPassword });
 
-  user.save((err) => {
-    if (err) {
-      return res.status(500).send({ message: 'Error registering user' });
-    }
-
+  try {
+    await user.save();
     res.send({ message: 'User registered' });
-  });
+  } catch (err) {
+    return res.status(500).send({ message: 'Error registering user' });
+  }
 });
 
 app.post('/login', (req, res) => {
