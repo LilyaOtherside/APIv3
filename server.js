@@ -8,7 +8,7 @@ const bcrypt = require('bcryptjs');
 const app = express();
 
 // Connect to MongoDB
-mongoose.connect('mongodb://127.0.0.1/consentDB', { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .catch(err => {
     console.error('MongoDB connection error:', err);
     process.exit(1);
