@@ -4,8 +4,12 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const cors = require('cors');  
 
 const app = express();
+
+// Use CORS middleware
+app.use(cors());
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -33,14 +37,10 @@ const checkJWT = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
-  if (!token) {
-    return res.status(401).send({ message: 'Unauthorized' });
-  }
+  if (!token) return res.status(401).send({ message: 'Unauthorized' });
 
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (err) {
-      return res.status(403).send({ message: 'Invalid token' });
-    }
+    if (err) return res.status(403).send({ message: 'Invalid token' });
 
     req.decoded = decoded;
     next();
@@ -91,8 +91,8 @@ app.delete('/api/v1/consent/:id', checkJWT, async (req, res) => {
   const { id } = req.params;
 
   try {
-    const result = await Consent.deleteOne({ _id: id });
-    if (result.deletedCount === 0) {
+    const result = await Consent.findByIdAndDelete(id);
+    if (!result) {
       return res.status(404).send({ message: 'Consent not found' });
     }
 
