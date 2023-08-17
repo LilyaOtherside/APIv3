@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const cors = require('cors');  
+const cors = require('cors');
 
 const app = express();
 
@@ -50,6 +50,20 @@ const checkJWT = (req, res, next) => {
 app.use(bodyParser.json());
 
 // Define your endpoints
+
+// Route to handle the GET request for a specific consent by its ID
+app.get('/api/v1/consent/:id', checkJWT, async (req, res) => {
+    try {
+        const consent = await Consent.findById(req.params.id);
+        if (!consent) {
+            return res.status(404).send({ message: 'Consent not found' });
+        }
+        res.send(consent);
+    } catch (err) {
+        res.status(500).send({ message: 'Error fetching consent' });
+    }
+});
+
 app.get('/api/v1/consent', checkJWT, async (req, res) => {
   try {
     const consents = await Consent.find();
